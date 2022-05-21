@@ -12,5 +12,5 @@ Package for using [Rustpotter](https://github.com/GiviMAD/rustpotter) (a free an
 
 Web target version of this package is available here: [npm](https://www.npmjs.com/package/rustpotter-web).
 
-For a easy to use version of this package you can check [rustpotter-worklet](https://github.com/GiviMAD/rustpotter-worklet).
+For an easy to use version of this package you can check [rustpotter-worklet](https://github.com/GiviMAD/rustpotter-worklet).
 
