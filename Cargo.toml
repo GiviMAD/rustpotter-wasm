@@ -4,7 +4,7 @@ version = "0.9.1"
 authors = ["Miguel Álvarez Díez <miguelwork92@gmail.com>"]
 edition = "2021"
 license = "Apache-2.0"
-description = "A free and open source wake word spotter forged in rust."
+description = "A free and open source wake word spotter forged in rust, for use on JavaScript as WebAssembly module."
 repository = "https://github.com/GiviMAD/rustpotter-wasm"
 
 [lib]
