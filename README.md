@@ -1,7 +1,7 @@
 # Rustpotter Wasm
 
 <div align="center">
-    <img src="./logo.png?raw=true" width="400px"</img> 
+    <img src="https://raw.githubusercontent.com/GiviMAD/rustpotter/0f1094278c36953cd265dbfe33430a42b176fe0e/logo.png" width="400px"> 
 </div>
 
 ## Description
