@@ -3,7 +3,7 @@ use rustpotter::{
     WakewordDetectorBuilder,
 };
 use wasm_bindgen::prelude::*;
-
+mod utils;
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
@@ -117,6 +117,7 @@ pub struct RustpotterJSBuilder {
 #[allow(non_snake_case)]
 impl RustpotterJSBuilder {
     pub fn new() -> Self {
+        utils::set_panic_hook();
         Self {
             builder: WakewordDetectorBuilder::new(),
         }

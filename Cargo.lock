@@ -285,9 +285,9 @@ dependencies = [
 
 [[package]]
 name = "rustpotter"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f635b35624aa2d3e839605c1e09bc8bbb3b7f89a3ff2e094a8a9c18eac80499"
+checksum = "a9721495bda0126011a2a10dc25375ef0255960056fc213d9eea5ce1018bc202"
 dependencies = [
  "hound",
  "log",
@@ -301,8 +301,9 @@ dependencies = [
 
 [[package]]
 name = "rustpotter-wasm"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
+ "console_error_panic_hook",
  "rustpotter",
  "wasm-bindgen",
  "wasm-bindgen-test",
