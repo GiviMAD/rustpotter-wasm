@@ -197,13 +197,6 @@ impl RustpotterJSBuilder {
     pub fn setSingleThread(&mut self, value: bool) {
         self.builder.set_single_thread(value);
     }
-    ///
-    /// Defaults to 3.
-    ///
-    /// Only applies if noise mode is set, if 0 noise detection is not disabled after a detection.
-    pub fn setNoiseDelay(&mut self, value: u16) {
-        self.builder.set_noise_delay(value);
-    }
     /// Noise/silence ratio in the last second to consider voice detected.
     ///
     /// Defaults to 0.5.
