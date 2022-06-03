@@ -1,6 +1,6 @@
 [package]
 name = "rustpotter-wasm"
-version = "0.11.0"
+version = "0.12.0"
 authors = ["Miguel Álvarez Díez <miguelwork92@gmail.com>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -16,7 +16,7 @@ default = []
 [dependencies]
 console_error_panic_hook = { version = "0.1.6", optional = true }
 wasm-bindgen = "0.2.63"
-rustpotter = "0.11.0"
+rustpotter = "0.12.0"
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. It is slower than the default
@@ -29,6 +29,4 @@ wee_alloc = { version = "0.4.5", optional = true }
 wasm-bindgen-test = "0.3.13"
 
 [profile.release]
-opt-level = 3
-codegen-units = 1
-lto = true
+opt-level = 's'
