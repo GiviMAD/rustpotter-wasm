@@ -117,7 +117,10 @@ pub struct RustpotterJSBuilder {
 #[allow(non_snake_case)]
 impl RustpotterJSBuilder {
     pub fn new() -> Self {
+        #[cfg(feature = "console_error_panic_hook")]
         utils::set_panic_hook();
+        #[cfg(feature = "log")]
+        utils::set_logger();
         Self {
             builder: WakewordDetectorBuilder::new(),
         }

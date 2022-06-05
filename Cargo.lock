@@ -209,9 +209,9 @@ dependencies = [
 
 [[package]]
 name = "rustpotter"
-version = "0.12.1"
+version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ed9410ec874658f6aa53d4648c7f3d503a882291d57d3499760b723d9562c45"
+checksum = "e1dc2bb06969711ece7c6513a38d78a88dd70cb547aeb7a29e4cb6a54a39556c"
 dependencies = [
  "hound",
  "once_cell",
@@ -224,12 +224,14 @@ dependencies = [
 
 [[package]]
 name = "rustpotter-wasm"
-version = "0.12.1"
+version = "0.12.3"
 dependencies = [
  "console_error_panic_hook",
+ "log",
  "rustpotter",
  "wasm-bindgen",
  "wasm-bindgen-test",
+ "wasm-logger",
  "wee_alloc",
 ]
 
@@ -419,6 +421,17 @@ checksum = "a77c5a6f82cc6093a321ca5fb3dc9327fe51675d477b3799b4a9375bac3b7b4c"
 dependencies = [
  "proc-macro2 1.0.39",
  "quote 1.0.18",
+]
+
+[[package]]
+name = "wasm-logger"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "074649a66bb306c8f2068c9016395fa65d8e08d2affcbf95acf3c24c3ab19718"
+dependencies = [
+ "log",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
