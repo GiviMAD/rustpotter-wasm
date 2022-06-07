@@ -209,9 +209,9 @@ dependencies = [
 
 [[package]]
 name = "rustpotter"
-version = "0.12.3"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1dc2bb06969711ece7c6513a38d78a88dd70cb547aeb7a29e4cb6a54a39556c"
+checksum = "ba6fc04b66f94dfa1e0de4b88f23b5a57aa03caa8694aac4b148eb379557e777"
 dependencies = [
  "hound",
  "once_cell",
@@ -224,7 +224,7 @@ dependencies = [
 
 [[package]]
 name = "rustpotter-wasm"
-version = "0.12.3"
+version = "0.13.1"
 dependencies = [
  "console_error_panic_hook",
  "log",
