@@ -6,7 +6,7 @@
 
 ## Description
 
-Package for using [Rustpotter](https://github.com/GiviMAD/rustpotter) (a free and open source wake word spotter forged in rust) library as a WebAssembly module in javascript.
+Package for using the [Rustpotter](https://github.com/GiviMAD/rustpotter) (an open source wake word spotter forged in rust) library as a WebAssembly module in Javascript.
 
 ## Web version
 
