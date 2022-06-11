@@ -17,11 +17,53 @@ pub struct RustpotterJS {
 #[wasm_bindgen]
 #[allow(non_snake_case)]
 impl RustpotterJS {
+    #[cfg(feature = "build-model")]
+    /// Loads a wakeword from its model path.
+    pub fn add_wakeword_with_wav_buffers(
+        &mut self,
+        name: &str,
+        sample1Name: Option<String>,
+        sample1: Option<Vec<u8>>,
+        sample2Name: Option<String>,
+        sample2: Option<Vec<u8>>,
+        sample3Name: Option<String>,
+        sample3: Option<Vec<u8>>,
+        sample4Name: Option<String>,
+        sample4: Option<Vec<u8>>,
+        sample5Name: Option<String>,
+        sample5: Option<Vec<u8>>,
+        sample6Name: Option<String>,
+        sample6: Option<Vec<u8>>,
+    ) -> Result<(), String> {
+        let mut samples: Vec<(String, Vec<u8>)> = Vec::new();
+        fn tryAdd(
+            collection: &mut Vec<(String, Vec<u8>)>,
+            name_option: Option<String>,
+            value_option: Option<Vec<u8>>,
+        ) {
+            if name_option.is_some() && value_option.is_some() {
+                collection.push((name_option.unwrap(), value_option.unwrap()));
+            };
+        }
+        tryAdd(&mut samples, sample1Name, sample1);
+        tryAdd(&mut samples, sample2Name, sample2);
+        tryAdd(&mut samples, sample3Name, sample3);
+        tryAdd(&mut samples, sample4Name, sample4);
+        tryAdd(&mut samples, sample5Name, sample5);
+        tryAdd(&mut samples, sample6Name, sample6);
+        if samples.is_empty() {
+            self.detector
+                .add_wakeword_with_wav_buffers(&name.to_string(), true, None, None, samples)
+                .map_err(|err| err.to_string())
+        } else {
+            Err("No samples provided".to_owned())
+        }
+    }
     /// Loads a wakeword from its model bytes.
-    pub fn addWakewordModelBytes(&mut self, data: Vec<u8>) {
+    pub fn addWakewordModelBytes(&mut self, data: Vec<u8>) -> Result<String, String> {
         self.detector
             .add_wakeword_from_model_bytes(data, true)
-            .unwrap();
+            .map_err(|err| err.to_string())
     }
     /// Process i32 audio chunks.
     ///
@@ -34,7 +76,7 @@ impl RustpotterJS {
     ///
     /// Asserts that detector sample_format is 'int'.
     pub fn processInt32(&mut self, buffer: &[i32]) -> Option<RustpotterDetection> {
-        transform_detection(self.detector.process_i32(buffer))
+        self.detector.process_i32(buffer).map(transform_detection)
     }
     /// Process i16 audio chunks.
     ///
@@ -47,7 +89,7 @@ impl RustpotterJS {
     ///
     /// Asserts that detector sample_format is 'int'.
     pub fn processInt16(&mut self, buffer: &[i16]) -> Option<RustpotterDetection> {
-        transform_detection(self.detector.process_i16(buffer))
+        self.detector.process_i16(buffer).map(transform_detection)
     }
     /// Process i8 audio chunks.
     ///
@@ -60,7 +102,7 @@ impl RustpotterJS {
     ///
     /// Asserts that detector sample_format is 'int'.
     pub fn processInt8(&mut self, buffer: &[i8]) -> Option<RustpotterDetection> {
-        transform_detection(self.detector.process_i8(buffer))
+        self.detector.process_i8(buffer).map(transform_detection)
     }
     /// Process f32 audio chunks.
     ///
@@ -73,22 +115,37 @@ impl RustpotterJS {
     ///
     /// Asserts that detector sample_format is 'float'.
     pub fn processFloat32(&mut self, buffer: &[f32]) -> Option<RustpotterDetection> {
-        transform_detection(self.detector.process_f32(buffer))
+        self.detector.process_f32(buffer).map(transform_detection)
+    }
+    /// Process bytes buffer.
+    ///
+    /// Asserts that the buffer length should match the return
+    /// of the get_bytes_per_frame method.
+    ///
+    /// Assumes sample rate match the configured for the detector.
+    ///
+    /// Assumes buffer endianness matches the configured for the detector.
+    ///
+    /// Asserts that detector bits_per_sample is 8, 16, 24 or 32 (float format only allows 32).
+    ///
+    pub fn processBuffer(&mut self, buffer: &[u8]) -> Option<RustpotterDetection> {
+        self.detector
+            .process_buffer(buffer)
+            .map(transform_detection)
     }
     /// Returns the desired chunk size.
     pub fn getFrameSize(&self) -> usize {
         self.detector.get_samples_per_frame()
     }
+    /// Returns the desired buffer size for the processBuffer method.
+    pub fn getByteFrameSize(&self) -> usize {
+        self.detector.get_bytes_per_frame()
+    }
 }
-fn transform_detection(detection_option: Option<DetectedWakeword>) -> Option<RustpotterDetection> {
-    if detection_option.is_some() {
-        let result = detection_option.unwrap();
-        Some(RustpotterDetection {
-            name: result.wakeword.clone(),
-            score: result.score,
-        })
-    } else {
-        None
+fn transform_detection(detection: DetectedWakeword) -> RustpotterDetection {
+    RustpotterDetection {
+        name: detection.wakeword,
+        score: detection.score,
     }
 }
 #[wasm_bindgen]
@@ -146,13 +203,15 @@ impl RustpotterJSBuilder {
     }
     /// Configures the detector expected bit per sample for the audio chunks to process.
     ///
-    /// Defaults to 16; Allowed values: 8, 16, 24, 32
+    /// When sample format is set to 'float' this is ignored as only 32 is supported.
+    ///
+    /// Defaults to 16; Allowed values: 8, 16, 24, 32.
     pub fn setBitsPerSample(&mut self, value: u16) {
         self.builder.set_bits_per_sample(value);
     }
     /// Configures the detector expected sample rate for the audio chunks to process.
     ///
-    /// Defaults to 16000
+    /// Defaults to 48000
     pub fn setSampleRate(&mut self, value: usize) {
         self.builder.set_sample_rate(value);
     }

@@ -1,6 +1,6 @@
 [package]
 name = "rustpotter-wasm"
-version = "0.14.4"
+version = "0.16.0"
 authors = ["Miguel Álvarez Díez <miguelwork92@gmail.com>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -11,14 +11,15 @@ repository = "https://github.com/GiviMAD/rustpotter-wasm"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default = []
+default = ["build_models"]
+build_models = []
 log = ["console_error_panic_hook","dep:log","dep:wasm-logger"]
 [dependencies]
 console_error_panic_hook = { version = "0.1.6", optional = true }
 log = { version = "0.4.6", optional = true }
 wasm-logger = { version = "0.2.0", optional = true }
 wasm-bindgen = "0.2.63"
-rustpotter = "0.14.4"
+rustpotter = "0.16.0"
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. It is slower than the default
@@ -32,3 +33,5 @@ wasm-bindgen-test = "0.3.13"
 
 [profile.release]
 opt-level = 's'
+lto = true
+codegen-units = 1
