@@ -190,7 +190,7 @@ impl RustpotterJSBuilder {
     pub fn setThreshold(&mut self, value: f32) {
         self.builder.set_threshold(value);
     }
-    /// Configures the detector threshold,
+    /// Configures the detector averaged threshold,
     /// is the min score (in range 0. to 1.) that  
     /// the averaged wakeword template should obtain to allow
     /// to continue with the detection. This way it can prevent to
@@ -241,8 +241,8 @@ impl RustpotterJSBuilder {
         self.builder.set_comparator_ref(value);
     }
     /// Enables eager mode.
-    /// Terminate the detection as son as one result is above the score,
-    /// instead of wait to see if the next frame has a higher score.
+    /// End detection as soon as a result is over the score, instead of
+    /// waiting to see if the next frame has a higher score.
     ///
     /// Recommended for real usage.
     ///
@@ -259,7 +259,7 @@ impl RustpotterJSBuilder {
     pub fn setSingleThread(&mut self, value: bool) {
         self.builder.set_single_thread(value);
     }
-    /// Noise/silence ratio in the last second to consider voice detected.
+    /// Noise/silence ratio in the last second to consider noise detected.
     ///
     /// Defaults to 0.5.
     ///
@@ -269,7 +269,7 @@ impl RustpotterJSBuilder {
     }
     /// Use build-in noise detection to reduce computation on absence of noise.
     ///
-    /// Configures how difficult is to considering a frame as noise (the required noise lever).
+    /// Configures how difficult is to considering a frame as noise (the required noise level).
     ///
     /// Unless specified the noise detection is disabled.
     pub fn setNoiseMode(&mut self, value: NoiseDetectionMode) {
