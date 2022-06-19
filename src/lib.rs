@@ -17,7 +17,7 @@ pub struct RustpotterJS {
 #[wasm_bindgen]
 #[allow(non_snake_case)]
 impl RustpotterJS {
-    #[cfg(feature = "build-model")]
+    #[cfg(feature = "build_models")]
     /// Loads a wakeword from its model path.
     pub fn add_wakeword_with_wav_buffers(
         &mut self,
@@ -58,6 +58,12 @@ impl RustpotterJS {
         } else {
             Err("No samples provided".to_owned())
         }
+    }
+    #[cfg(feature = "build_models")]
+    pub fn generate_wakeword_model_bytes(&self, name: String) -> Result<Vec<u8>, String> {
+        self.detector
+            .generate_wakeword_model_bytes(name)
+            .map_err(|err| err.to_string())
     }
     /// Loads a wakeword from its model bytes.
     pub fn addWakewordModelBytes(&mut self, data: Vec<u8>) -> Result<String, String> {
