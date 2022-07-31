@@ -51,7 +51,7 @@ impl RustpotterJS {
         tryAdd(&mut samples, sample4Name, sample4);
         tryAdd(&mut samples, sample5Name, sample5);
         tryAdd(&mut samples, sample6Name, sample6);
-        if samples.is_empty() {
+        if !samples.is_empty() {
             self.detector
                 .add_wakeword_with_wav_buffers(&name.to_string(), true, None, None, samples)
                 .map_err(|err| err.to_string())
