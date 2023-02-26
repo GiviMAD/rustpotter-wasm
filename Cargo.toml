@@ -1,26 +1,26 @@
 [package]
 name = "rustpotter-wasm"
-version = "1.1.2"
+version = "2.0.0-beta.1"
 authors = ["Miguel Álvarez Díez <miguelwork92@gmail.com>"]
 edition = "2021"
 license = "Apache-2.0"
-description = "An open source wake word spotter forged in rust, for use on JavaScript as WebAssembly module."
+description = "An open source wakeword spotter forged in rust, for use on JavaScript as WebAssembly module."
 repository = "https://github.com/GiviMAD/rustpotter-wasm"
-
+exclude = [ "tools/**" ]
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [features]
 default = ["build_models"]
 wee_alloc = ["dep:wee_alloc"]
-build_models = ["rustpotter/build"]
+build_models = []
 log = ["console_error_panic_hook","dep:log","dep:wasm-logger"]
 [dependencies]
 console_error_panic_hook = { version = "0.1.6", optional = true }
 log = { version = "0.4.6", optional = true }
 wasm-logger = { version = "0.2.0", optional = true }
 wasm-bindgen = "0.2.63"
-rustpotter = { version = "1.0.1", default-features = false}
+rustpotter = { version = "2.0.0-beta.1", default-features = false }
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. It is slower than the default
