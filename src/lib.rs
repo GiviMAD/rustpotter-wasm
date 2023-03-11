@@ -1,4 +1,6 @@
 mod utils;
+
+#[cfg(feature = "build_models")]
 use std::collections::HashMap;
 
 #[cfg(feature = "build_models")]
