@@ -33,15 +33,15 @@ impl Wakeword {
             files: HashMap::new(),
         }
     }
-    /// Add a wav file with name and data
+    /// Add a wav file with name and data.
     pub fn addFile(&mut self, name: String, buffer: Vec<u8>) {
         self.files.insert(name, buffer);
     }
-    /// Remove a wav file by name
+    /// Remove a wav file by name.
     pub fn removeFile(&mut self, name: &str) {
         self.files.remove(name);
     }
-    /// Returns the model file bytes
+    /// Returns the model file bytes.
     pub fn saveToBytes(&mut self) -> Result<Vec<u8>, String> {
         WakewordImpl::new_from_sample_buffers(self.name.clone(), None, None, self.files.clone())?
             .save_to_buffer()
@@ -69,7 +69,7 @@ impl Rustpotter {
     ///
     /// Asserts that detector sample_format is 'int'.
     pub fn processInt32(&mut self, buffer: &[i32]) -> Option<RustpotterDetection> {
-        self.detector.process_int_buffer(buffer).map(|d| d.into())
+        self.detector.process_i32(buffer).map(|d| d.into())
     }
     /// Process i16 audio chunks.
     ///
@@ -82,7 +82,7 @@ impl Rustpotter {
     ///
     /// Asserts that detector sample_format is 'int'.
     pub fn processInt16(&mut self, buffer: &[i16]) -> Option<RustpotterDetection> {
-        self.detector.process_short_buffer(buffer).map(|d| d.into())
+        self.detector.process_i16(buffer).map(|d| d.into())
     }
     /// Process f32 audio chunks.
     ///
@@ -95,7 +95,7 @@ impl Rustpotter {
     ///
     /// Assumes that detector sample_format is 'float'.
     pub fn processFloat32(&mut self, buffer: &[f32]) -> Option<RustpotterDetection> {
-        self.detector.process_float_buffer(buffer).map(|d| d.into())
+        self.detector.process_f32(buffer).map(|d| d.into())
     }
     /// Process bytes buffer.
     ///
@@ -109,40 +109,25 @@ impl Rustpotter {
     /// Assumes that detector bits_per_sample is 8, 16, 32.
     ///
     pub fn processBuffer(&mut self, buffer: &[u8]) -> Option<RustpotterDetection> {
-        self.detector.process_byte_buffer(buffer).map(|d| d.into())
+        self.detector.process_bytes(buffer).map(|d| d.into())
     }
-    /// Returns the desired chunk size.
+    /// Returns the required number of samples.
     pub fn getFrameSize(&self) -> usize {
         self.detector.get_samples_per_frame()
     }
-    /// Returns the desired buffer size for the processBuffer method.
+    /// Returns the required number of bytes.
     pub fn getByteFrameSize(&self) -> usize {
         self.detector.get_bytes_per_frame()
     }
 }
 impl From<RustpotterDetectionImpl> for RustpotterDetection {
-    fn from(value: RustpotterDetectionImpl) -> Self {
-        RustpotterDetection {
-            name: value.name,
-            avg_score: value.avg_score,
-            score: value.score,
-            scores: value.scores,
-            counter: value.counter,
-        }
+    fn from(detection: RustpotterDetectionImpl) -> Self {
+        RustpotterDetection { detection }
     }
 }
 #[wasm_bindgen]
 pub struct RustpotterDetection {
-    /// Detected wakeword name.
-    name: String,
-    /// Detection score against the averaged template.
-    avg_score: f32,
-    /// Detection score.
-    score: f32,
-    /// Detection scores against each template.
-    scores: HashMap<String, f32>,
-    /// Partial detections counter.
-    counter: usize,
+    detection: RustpotterDetectionImpl,
 }
 
 #[wasm_bindgen]
@@ -150,36 +135,42 @@ pub struct RustpotterDetection {
 impl RustpotterDetection {
     /// Get detection name
     pub fn getName(&self) -> String {
-        self.name.clone()
+        self.detection.name.clone()
     }
     /// Get detection score
     pub fn getScore(&self) -> f32 {
-        self.score
+        self.detection.score
     }
     /// Get detection avg score
     pub fn getAvgScore(&self) -> f32 {
-        self.avg_score
+        self.detection.avg_score
     }
-    /// Get score file names as a comma separated string
+    /// Get score file names as a || separated string
     pub fn getScoreNames(&self) -> String {
-        self.scores
+        self.detection
+            .scores
             .keys()
             .into_iter()
             .map(|v| v.to_string())
             .collect::<Vec<String>>()
-            .join(",")
+            .join("||")
     }
     /// Get detection score by file name
     pub fn getScoreByName(&self, name: &str) -> Option<f32> {
-        self.scores.get(name).map(|v| *v)
+        self.detection.scores.get(name).map(|v| *v)
     }
-    /// Get detection scores filenames
-    pub fn getScoreValues(&self) -> Vec<f32> {
-        self.scores.values().into_iter().map(|v| *v).collect()
+    /// Get detection scores
+    pub fn getScores(&self) -> Vec<f32> {
+        self.detection
+            .scores
+            .values()
+            .into_iter()
+            .map(|v| *v)
+            .collect()
     }
     /// Get partial detections counter
     pub fn getCounter(&self) -> usize {
-        self.counter
+        self.detection.counter
     }
 }
 
@@ -238,11 +229,24 @@ impl RustpotterBuilder {
     pub fn setGainNormalizerEnabled(&mut self, value: bool) {
         self.config.filters.gain_normalizer.enabled = value;
     }
-    /// Use a gain-normalization filter to dynamically change the input volume level.
+    /// Set the rms level reference used by the gain-normalizer filter.
+    /// If null the approximated wakewords rms level is used.
     ///
-    /// Defaults to false
-    pub fn setGainNormalizerRMSLevelRef(&mut self, value: Option<f32>) {
-        self.config.filters.gain_normalizer.rms_level_ref = value;
+    /// Defaults to null
+    pub fn setGainRef(&mut self, value: Option<f32>) {
+        self.config.filters.gain_normalizer.gain_ref = value;
+    }
+    /// Sets the min gain applied by the gain-normalizer filter.
+    ///
+    /// Defaults to 0.1
+    pub fn setMinGain(&mut self, value: f32) {
+        self.config.filters.gain_normalizer.min_gain = value;
+    }
+    /// Sets the max gain applied by the gain-normalizer filter.
+    ///
+    /// Defaults to 1.0
+    pub fn setMaxGain(&mut self, value: f32) {
+        self.config.filters.gain_normalizer.max_gain = value;
     }
     /// Use a band-pass filter to attenuate frequencies
     /// out of the configured range.
@@ -269,7 +273,7 @@ impl RustpotterBuilder {
     ///
     /// When sample format is set to 'float' this is ignored as only 32 is supported.
     ///
-    /// Defaults to 16; Allowed values: 8, 16, 24, 32.
+    /// Defaults to 16; Allowed values: 8, 16, 24, 32
     pub fn setBitsPerSample(&mut self, value: u16) {
         self.config.fmt.bits_per_sample = value;
     }
@@ -298,20 +302,12 @@ impl RustpotterBuilder {
     pub fn setComparatorBandSize(&mut self, value: u16) {
         self.config.detector.comparator_band_size = value;
     }
-    /// Configures the reference for the comparator used to match the samples.
+    /// Configures the comparator reference.
     ///
     /// Defaults to 0.22
     pub fn setComparatorRef(&mut self, value: f32) {
-        self.config.detector.comparator_reference = value;
+        self.config.detector.comparator_ref = value;
     }
-    // /// Noise/silence ratio in the last second to consider noise detected.
-    // ///
-    // /// Defaults to 0.5.
-    // ///
-    // /// Only applies if noise mode is set.
-    // pub fn setNoiseSensitivity(&mut self, value: f32) {
-    //     self.builder.set_noise_sensitivity(value);
-    // }
     /// construct the wakeword detector
     pub fn build(&self) -> Result<Rustpotter, String> {
         Ok(Rustpotter {
