@@ -174,6 +174,10 @@ impl RustpotterDetection {
     pub fn getCounter(&self) -> usize {
         self.detection.counter
     }
+    /// Get gain applied
+    pub fn getGain(&self) -> f32 {
+        self.detection.gain
+    }
 }
 
 #[wasm_bindgen]
