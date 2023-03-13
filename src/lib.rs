@@ -1,5 +1,3 @@
-mod utils;
-
 #[cfg(feature = "build_models")]
 use std::collections::HashMap;
 
@@ -218,7 +216,7 @@ impl RustpotterBuilder {
     /// Configures the required number of partial detections
     /// to consider a partial detection as a real detection.
     ///
-    /// Defaults to 10
+    /// Defaults to 5
     pub fn setMinScores(&mut self, value: usize) {
         self.config.detector.min_scores = value;
     }
