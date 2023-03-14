@@ -204,9 +204,9 @@ dependencies = [
 
 [[package]]
 name = "rustpotter"
-version = "2.0.0-beta.4"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdc299315c711c05f9b70cf7b48dc1c7760c537bf5c4e439e9fe0c4cd57da489"
+checksum = "e6a88d0514dd5dcc988c78f61be4f60fdb37d4872e23c7d8d6d2d3ea23655f97"
 dependencies = [
  "ciborium",
  "hound",
@@ -217,7 +217,7 @@ dependencies = [
 
 [[package]]
 name = "rustpotter-wasm"
-version = "2.0.0-beta.4"
+version = "2.0.0"
 dependencies = [
  "console_error_panic_hook",
  "log",
