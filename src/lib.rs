@@ -300,13 +300,13 @@ impl RustpotterBuilder {
     pub fn setChannels(&mut self, value: u16) {
         self.config.fmt.channels = value;
     }
-    /// Configures the band-size for the comparator used to match the samples.
+    /// Configures the comparator the band size.
     ///
     /// Defaults to 6
     pub fn setComparatorBandSize(&mut self, value: u16) {
         self.config.detector.comparator_band_size = value;
     }
-    /// Configures the comparator reference.
+    /// Configures the comparator reference, used to express the score as a percent.
     ///
     /// Defaults to 0.22
     pub fn setComparatorRef(&mut self, value: f32) {
