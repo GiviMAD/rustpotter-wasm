@@ -1,6 +1,6 @@
 [package]
 name = "rustpotter-wasm"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Miguel Álvarez Díez <miguelwork92@gmail.com>"]
 edition = "2021"
 license = "Apache-2.0"

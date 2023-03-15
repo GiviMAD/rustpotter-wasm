@@ -329,6 +329,18 @@ pub enum ScoreMode {
     avg,
     /// Use median value of the scores.
     median,
+    /// Use percentile 25 of the scores.
+    p25,
+    /// Use percentile 50 of the scores.
+    p50,
+    /// Use percentile 75 of the scores.
+    p75,
+    /// Use percentile 80 of the scores.
+    p80,
+    /// Use percentile 90 of the scores.
+    p90,
+    /// Use percentile 95 of the scores.
+    p95,
 }
 impl From<ScoreMode> for RustpotterScoreMode {
     fn from(value: ScoreMode) -> Self {
@@ -336,6 +348,12 @@ impl From<ScoreMode> for RustpotterScoreMode {
             ScoreMode::max => RustpotterScoreMode::Max,
             ScoreMode::median => RustpotterScoreMode::Median,
             ScoreMode::avg => RustpotterScoreMode::Average,
+            ScoreMode::p25 => RustpotterScoreMode::P25,
+            ScoreMode::p50 => RustpotterScoreMode::P50,
+            ScoreMode::p75 => RustpotterScoreMode::P75,
+            ScoreMode::p80 => RustpotterScoreMode::P80,
+            ScoreMode::p90 => RustpotterScoreMode::P90,
+            ScoreMode::p95 => RustpotterScoreMode::P95,
         }
     }
 }
