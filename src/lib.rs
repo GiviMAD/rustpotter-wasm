@@ -1,8 +1,12 @@
-#[cfg(feature = "build_models")]
+#[cfg(feature = "build_refs")]
 use std::collections::HashMap;
 
-#[cfg(feature = "build_models")]
-use rustpotter::Wakeword as WakewordImpl;
+#[cfg(feature = "build_refs")]
+use rustpotter::{
+    WakewordRefBuildFromBuffers,
+    WakewordSave,
+    WakewordRef as WakewordImpl,
+};
 use rustpotter::{
     Rustpotter as RustpotterImpl, RustpotterConfig, RustpotterDetection as RustpotterDetectionImpl,
     SampleFormat as RustpotterSampleFormat, ScoreMode as RustpotterScoreMode,
@@ -14,18 +18,18 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[cfg(feature = "build_models")]
+#[cfg(feature = "build_refs")]
 #[wasm_bindgen]
-pub struct Wakeword {
+pub struct WakewordRef {
     name: String,
     files: HashMap<String, Vec<u8>>,
 }
 
-#[cfg(feature = "build_models")]
+#[cfg(feature = "build_refs")]
 #[wasm_bindgen]
 #[allow(non_snake_case)]
-/// Utility for creating wakeword models.
-impl Wakeword {
+/// Utility for creating wakeword refs.
+impl WakewordRef {
     /// Creates a new instance.
     pub fn new(name: String) -> Self {
         Self {
@@ -58,65 +62,36 @@ impl Rustpotter {
     pub fn addWakeword(&mut self, bytes: Vec<u8>) -> Result<(), String> {
         self.detector.add_wakeword_from_buffer(&bytes)
     }
-    /// Process i32 audio chunks.
+    /// Process int 32 bit audio chunks.
     ///
-    /// Asserts that the audio chunk length should match the return
-    /// of the get_samples_per_frame method.
-    ///
-    /// Assumes sample rate match the configured for the detector.
-    ///
-    /// Asserts that detector bits_per_sample is one of: 8, 16, 24, 32.
-    ///
-    /// Asserts that detector sample_format is 'int'.
-    pub fn processInt32(&mut self, buffer: &[i32]) -> Option<RustpotterDetection> {
-        self.detector.process_i32(buffer).map(|d| d.into())
+    /// The buffer length should match the return of the getSamplesPerFrame method.
+    pub fn processI32(&mut self, buffer: &[i32]) -> Option<RustpotterDetection> {
+        self.detector.process_samples::<i32>(buffer.into()).map(|d| d.into())
     }
-    /// Process i16 audio chunks.
+    /// Process int 16 bit audio chunks.
     ///
-    /// Asserts that the audio chunk length should match the return
-    /// of the get_samples_per_frame method.
-    ///
-    /// Assumes sample rate match the configured for the detector.
-    ///
-    /// Asserts that detector bits_per_sample is one of: 8, 16.
-    ///
-    /// Asserts that detector sample_format is 'int'.
-    pub fn processInt16(&mut self, buffer: &[i16]) -> Option<RustpotterDetection> {
-        self.detector.process_i16(buffer).map(|d| d.into())
+    /// The buffer length should match the return of the getSamplesPerFrame method.
+    pub fn processI16(&mut self, buffer: &[i16]) -> Option<RustpotterDetection> {
+        self.detector.process_samples::<i16>(buffer.into()).map(|d| d.into())
     }
-    /// Process f32 audio chunks.
+    /// Process float 32 bit audio chunks.
     ///
-    /// Asserts that the audio chunk length should match the return
-    /// of the get_samples_per_frame method.
-    ///
-    /// Assumes sample rate match the configured for the detector.
-    ///
-    /// Assumes that detector bits_per_sample is 32.
-    ///
-    /// Assumes that detector sample_format is 'float'.
-    pub fn processFloat32(&mut self, buffer: &[f32]) -> Option<RustpotterDetection> {
-        self.detector.process_f32(buffer).map(|d| d.into())
+    /// The buffer length should match the return of the getSamplesPerFrame method.
+    pub fn processF32(&mut self, buffer: &[f32]) -> Option<RustpotterDetection> {
+        self.detector.process_samples::<f32>(buffer.into()).map(|d| d.into())
     }
-    /// Process bytes buffer.
+    /// Process byte buffer.
     ///
-    /// Asserts that the buffer length should match the return
-    /// of the get_bytes_per_frame method.
-    ///
-    /// Assumes sample rate match the configured for the detector.
-    ///
-    /// Assumes buffer endianness matches the configured for the detector.
-    ///
-    /// Assumes that detector bits_per_sample is 8, 16, 32.
-    ///
-    pub fn processBuffer(&mut self, buffer: &[u8]) -> Option<RustpotterDetection> {
+    /// The buffer length should match the return of the getByteFrameSize method.
+    pub fn processBytes(&mut self, buffer: &[u8]) -> Option<RustpotterDetection> {
         self.detector.process_bytes(buffer).map(|d| d.into())
     }
     /// Returns the required number of samples.
-    pub fn getFrameSize(&self) -> usize {
+    pub fn getSamplesPerFrame(&self) -> usize {
         self.detector.get_samples_per_frame()
     }
     /// Returns the required number of bytes.
-    pub fn getByteFrameSize(&self) -> usize {
+    pub fn getBytesPerFrame(&self) -> usize {
         self.detector.get_bytes_per_frame()
     }
 }
@@ -203,13 +178,10 @@ impl RustpotterBuilder {
         self.config.detector.threshold = value;
     }
     /// Configures the detector averaged threshold,
-    /// is the min score (in range 0. to 1.) that  
-    /// the averaged wakeword template should obtain to allow
-    /// to continue with the detection. This way it can prevent to
-    /// run the comparison of the current frame against each of the wakeword templates.
+    /// 
     /// If set to 0. this functionality is disabled.
     ///
-    /// Defaults to half of the configured threshold, wakeword defined value takes prevalence if present.
+    /// Wakeword defined value takes prevalence if present.
     pub fn setAveragedThreshold(&mut self, value: f32) {
         self.config.detector.avg_threshold = value;
     }
@@ -222,6 +194,7 @@ impl RustpotterBuilder {
     }
     /// Configures the score operation to unify the score values
     /// against each wakeword template.
+    /// Doesn't apply to trained wakewords.
     ///
     /// Defaults to max
     pub fn setScoreMode(&mut self, value: ScoreMode) {
@@ -273,14 +246,6 @@ impl RustpotterBuilder {
     pub fn setBandPassHighCutoff(&mut self, value: f32) {
         self.config.filters.band_pass.high_cutoff = value;
     }
-    /// Configures the detector expected bit per sample for the audio chunks to process.
-    ///
-    /// When sample format is set to 'float' this is ignored as only 32 is supported.
-    ///
-    /// Defaults to 16; Allowed values: 8, 16, 24, 32
-    pub fn setBitsPerSample(&mut self, value: u16) {
-        self.config.fmt.bits_per_sample = value;
-    }
     /// Configures the detector expected sample rate for the audio chunks to process.
     ///
     /// Defaults to 48000
@@ -294,23 +259,24 @@ impl RustpotterBuilder {
         self.config.fmt.sample_format = value.into();
     }
     /// Configures the detector expected number of channels for the audio chunks to process.
-    /// Rustpotter will only use data for first channel.
+    /// Rustpotter will only use data from the first channel.
     ///
     /// Defaults to 1
     pub fn setChannels(&mut self, value: u16) {
         self.config.fmt.channels = value;
     }
     /// Configures the comparator the band size.
+    /// Doesn't apply to trained wakewords.
     ///
     /// Defaults to 6
-    pub fn setComparatorBandSize(&mut self, value: u16) {
-        self.config.detector.comparator_band_size = value;
+    pub fn setBandSize(&mut self, value: u16) {
+        self.config.detector.band_size = value;
     }
-    /// Configures the comparator reference, used to express the score as a percent.
+    /// Value used to express the score as a percent in range 0 - 1.
     ///
     /// Defaults to 0.22
-    pub fn setComparatorRef(&mut self, value: f32) {
-        self.config.detector.comparator_ref = value;
+    pub fn setScoreRef(&mut self, value: f32) {
+        self.config.detector.score_ref = value;
     }
     /// construct the wakeword detector
     pub fn build(&self) -> Result<Rustpotter, String> {
@@ -360,14 +326,18 @@ impl From<ScoreMode> for RustpotterScoreMode {
 #[wasm_bindgen]
 #[allow(non_camel_case_types)]
 pub enum SampleFormat {
-    int,
-    float,
+    i8,
+    i16,
+    i32,
+    f32,
 }
 impl From<SampleFormat> for RustpotterSampleFormat {
     fn from(value: SampleFormat) -> Self {
         match value {
-            SampleFormat::int => RustpotterSampleFormat::Int,
-            SampleFormat::float => RustpotterSampleFormat::Float,
+            SampleFormat::i8 => RustpotterSampleFormat::I8,
+            SampleFormat::i16 => RustpotterSampleFormat::I16,
+            SampleFormat::i32 => RustpotterSampleFormat::I32,
+            SampleFormat::f32 => RustpotterSampleFormat::F32,
         }
     }
 }
