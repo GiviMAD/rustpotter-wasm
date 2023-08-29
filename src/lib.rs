@@ -1,16 +1,13 @@
 #[cfg(feature = "build_refs")]
 use std::collections::HashMap;
 
-#[cfg(feature = "build_refs")]
-use rustpotter::{
-    WakewordRefBuildFromBuffers,
-    WakewordSave,
-    WakewordRef as WakewordImpl,
-};
 use rustpotter::{
     Rustpotter as RustpotterImpl, RustpotterConfig, RustpotterDetection as RustpotterDetectionImpl,
     SampleFormat as RustpotterSampleFormat, ScoreMode as RustpotterScoreMode,
+    VADMode as RustpotterVADMode,
 };
+#[cfg(feature = "build_refs")]
+use rustpotter::{WakewordRef as WakewordImpl, WakewordRefBuildFromBuffers, WakewordSave};
 use wasm_bindgen::prelude::*;
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -47,8 +44,14 @@ impl WakewordRef {
     }
     /// Returns the model file bytes.
     pub fn saveToBytes(&mut self) -> Result<Vec<u8>, String> {
-        WakewordImpl::new_from_sample_buffers(self.name.clone(), None, None, self.files.clone())?
-            .save_to_buffer()
+        WakewordImpl::new_from_sample_buffers(
+            self.name.clone(),
+            None,
+            None,
+            self.files.clone(),
+            16,
+        )?
+        .save_to_buffer()
     }
 }
 #[wasm_bindgen]
@@ -66,19 +69,25 @@ impl Rustpotter {
     ///
     /// The buffer length should match the return of the getSamplesPerFrame method.
     pub fn processI32(&mut self, buffer: &[i32]) -> Option<RustpotterDetection> {
-        self.detector.process_samples::<i32>(buffer.into()).map(|d| d.into())
+        self.detector
+            .process_samples::<i32>(buffer.into())
+            .map(|d| d.into())
     }
     /// Process int 16 bit audio chunks.
     ///
     /// The buffer length should match the return of the getSamplesPerFrame method.
     pub fn processI16(&mut self, buffer: &[i16]) -> Option<RustpotterDetection> {
-        self.detector.process_samples::<i16>(buffer.into()).map(|d| d.into())
+        self.detector
+            .process_samples::<i16>(buffer.into())
+            .map(|d| d.into())
     }
     /// Process float 32 bit audio chunks.
     ///
     /// The buffer length should match the return of the getSamplesPerFrame method.
     pub fn processF32(&mut self, buffer: &[f32]) -> Option<RustpotterDetection> {
-        self.detector.process_samples::<f32>(buffer.into()).map(|d| d.into())
+        self.detector
+            .process_samples::<f32>(buffer.into())
+            .map(|d| d.into())
     }
     /// Process byte buffer.
     ///
@@ -178,7 +187,7 @@ impl RustpotterBuilder {
         self.config.detector.threshold = value;
     }
     /// Configures the detector averaged threshold,
-    /// 
+    ///
     /// If set to 0. this functionality is disabled.
     ///
     /// Wakeword defined value takes prevalence if present.
@@ -191,6 +200,12 @@ impl RustpotterBuilder {
     /// Defaults to 5
     pub fn setMinScores(&mut self, value: usize) {
         self.config.detector.min_scores = value;
+    }
+    /// Configures a basic vad detector to avoid some execution.
+    ///
+    /// Disabled by default
+    pub fn setVADMode(&mut self, value: Option<VADMode>) {
+        self.config.detector.vad_mode = value.map(|v| v.into());
     }
     /// Configures the score operation to unify the score values
     /// against each wakeword template.
@@ -320,6 +335,22 @@ impl From<ScoreMode> for RustpotterScoreMode {
             ScoreMode::p80 => RustpotterScoreMode::P80,
             ScoreMode::p90 => RustpotterScoreMode::P90,
             ScoreMode::p95 => RustpotterScoreMode::P95,
+        }
+    }
+}
+#[wasm_bindgen]
+#[allow(non_camel_case_types)]
+pub enum VADMode {
+    easy,
+    medium,
+    hard,
+}
+impl From<VADMode> for RustpotterVADMode {
+    fn from(value: VADMode) -> Self {
+        match value {
+            VADMode::easy => RustpotterVADMode::Easy,
+            VADMode::medium => RustpotterVADMode::Medium,
+            VADMode::hard => RustpotterVADMode::Hard,
         }
     }
 }
