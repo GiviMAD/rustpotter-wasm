@@ -263,13 +263,13 @@ impl RustpotterBuilder {
     }
     /// Configures the detector expected sample rate for the audio chunks to process.
     ///
-    /// Defaults to 48000
+    /// Defaults to 16000
     pub fn setSampleRate(&mut self, value: usize) {
         self.config.fmt.sample_rate = value;
     }
     /// Configures the detector expected sample format for the audio chunks to process.
     ///
-    /// Defaults to int
+    /// Defaults to F32
     pub fn setSampleFormat(&mut self, value: SampleFormat) {
         self.config.fmt.sample_format = value.into();
     }
