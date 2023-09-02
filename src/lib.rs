@@ -61,10 +61,6 @@ pub struct Rustpotter {
 #[wasm_bindgen]
 #[allow(non_snake_case)]
 impl Rustpotter {
-    /// Loads a wakeword from its model bytes.
-    pub fn addWakeword(&mut self, bytes: Vec<u8>) -> Result<(), String> {
-        self.detector.add_wakeword_from_buffer(&bytes)
-    }
     /// Process int 32 bit audio chunks.
     ///
     /// The buffer length should match the return of the getSamplesPerFrame method.
@@ -94,6 +90,18 @@ impl Rustpotter {
     /// The buffer length should match the return of the getByteFrameSize method.
     pub fn processBytes(&mut self, buffer: &[u8]) -> Option<RustpotterDetection> {
         self.detector.process_bytes(buffer).map(|d| d.into())
+    }
+    /// Loads a wakeword from its model bytes.
+    pub fn addWakeword(&mut self, key: &str, bytes: Vec<u8>) -> Result<(), String> {
+        self.detector.add_wakeword_from_buffer(key, &bytes)
+    }
+    /// Removes a wakeword by key.
+    pub fn removeWakeword(&mut self, key: &str) -> bool {
+        self.detector.remove_wakeword(key)
+    }
+    /// Removes all wakewords.
+    pub fn removeWakewords(&mut self) -> bool {
+        self.detector.remove_wakewords()
     }
     /// Returns the required number of samples.
     pub fn getSamplesPerFrame(&self) -> usize {
