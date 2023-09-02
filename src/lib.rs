@@ -103,6 +103,10 @@ impl Rustpotter {
     pub fn getBytesPerFrame(&self) -> usize {
         self.detector.get_bytes_per_frame()
     }
+    /// Reset internal state.
+    pub fn reset(&mut self) {
+        self.detector.reset()
+    }
 }
 impl From<RustpotterDetectionImpl> for RustpotterDetection {
     fn from(detection: RustpotterDetectionImpl) -> Self {
