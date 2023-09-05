@@ -6,11 +6,10 @@
 
 ## Description
 
-Package for using [Rustpotter](https://github.com/GiviMAD/rustpotter) (an open source wakeword spotter forged in rust) as a WebAssembly module in Javascript.
+Package for using [Rustpotter](https://github.com/GiviMAD/rustpotter) (an open source wakeword spotter forged in rust) in JavaScript.
 
-## Web version
+For browser usage, it's recommended to use this package [rustpotter-worklet](https://github.com/GiviMAD/rustpotter-worklet), which facilitates using the tool along the web audio API.
 
-Web target version of this package is available here: [npm](https://www.npmjs.com/package/rustpotter-web).
+# Installation
 
-For an easy to use version of this package you can check [rustpotter-worklet](https://github.com/GiviMAD/rustpotter-worklet).
-
+This library can be installed through [npm](https://www.npmjs.com/package/rustpotter-web).
