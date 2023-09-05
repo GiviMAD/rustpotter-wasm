@@ -8,7 +8,7 @@
 
 Package for using [Rustpotter](https://github.com/GiviMAD/rustpotter) (an open source wakeword spotter forged in rust) in JavaScript.
 
-For browser usage, it's recommended to use this package [rustpotter-worklet](https://github.com/GiviMAD/rustpotter-worklet), which facilitates using the tool along the browser audio API.
+For browser usage, it's recommended to use this package [rustpotter-worklet](https://github.com/GiviMAD/rustpotter-worklet), which facilitates using the tool along the web audio API.
 
 # Installation
 

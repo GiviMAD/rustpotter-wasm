@@ -7,27 +7,25 @@ use rustpotter::{
     ScoreMode as RustpotterScoreMode, VADMode as RustpotterVADMode,
 };
 #[cfg(feature = "build_refs")]
-use rustpotter::{WakewordRef as WakewordImpl, WakewordRefBuildFromBuffers, WakewordSave};
+use rustpotter::{WakewordRef, WakewordRefBuildFromBuffers, WakewordSave};
 use wasm_bindgen::prelude::*;
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 #[cfg(feature = "build_refs")]
 #[wasm_bindgen]
-pub struct WakewordRef {
+pub struct WakewordRefCreator {
     name: String,
     files: HashMap<String, Vec<u8>>,
 }
-
 #[cfg(feature = "build_refs")]
 #[wasm_bindgen]
 #[allow(non_snake_case)]
-/// Utility for creating wakeword refs.
-impl WakewordRef {
-    /// Creates a new instance.
+/// Utility for creating wakeword references.
+impl WakewordRefCreator {
+    /// Creates a wakeword reference.
     pub fn new(name: String) -> Self {
         Self {
             name: name,
@@ -44,14 +42,8 @@ impl WakewordRef {
     }
     /// Returns the model file bytes.
     pub fn saveToBytes(&mut self) -> Result<Vec<u8>, String> {
-        WakewordImpl::new_from_sample_buffers(
-            self.name.clone(),
-            None,
-            None,
-            self.files.clone(),
-            16,
-        )?
-        .save_to_buffer()
+        WakewordRef::new_from_sample_buffers(self.name.clone(), None, None, self.files.clone(), 16)?
+            .save_to_buffer()
     }
 }
 #[wasm_bindgen]
@@ -61,7 +53,7 @@ pub struct Rustpotter {
 #[wasm_bindgen]
 #[allow(non_snake_case)]
 impl Rustpotter {
-    /// Creates rustpotter instance.
+    /// Creates a rustpotter instance.
     pub fn new(config: &RustpotterConfig) -> Result<Rustpotter, String> {
         Ok(Rustpotter {
             lib: RustpotterImpl::new(&config.lib_config)?,
@@ -135,7 +127,6 @@ impl From<RustpotterDetectionImpl> for RustpotterDetection {
 pub struct RustpotterDetection {
     detection: RustpotterDetectionImpl,
 }
-
 #[wasm_bindgen]
 #[allow(non_snake_case)]
 impl RustpotterDetection {
@@ -183,7 +174,6 @@ impl RustpotterDetection {
         self.detection.gain
     }
 }
-
 #[wasm_bindgen]
 pub struct RustpotterConfig {
     lib_config: RustpotterConfigImpl,
@@ -191,6 +181,7 @@ pub struct RustpotterConfig {
 #[wasm_bindgen]
 #[allow(non_snake_case)]
 impl RustpotterConfig {
+    /// Creates a rustpotter config instance.
     pub fn new() -> Self {
         #[cfg(feature = "console_error_panic_hook")]
         utils::set_panic_hook();
@@ -235,6 +226,25 @@ impl RustpotterConfig {
     /// Defaults to max
     pub fn setScoreMode(&mut self, value: ScoreMode) {
         self.lib_config.detector.score_mode = value.into();
+    }
+    /// Configures the comparator the band size.
+    /// Doesn't apply to trained wakewords.
+    ///
+    /// Defaults to 5
+    pub fn setBandSize(&mut self, value: u16) {
+        self.lib_config.detector.band_size = value;
+    }
+    /// Value used to express the score as a percent in range 0 - 1.
+    ///
+    /// Defaults to 0.22
+    pub fn setScoreRef(&mut self, value: f32) {
+        self.lib_config.detector.score_ref = value;
+    }
+    /// Emit detection on min scores.
+    ///
+    /// Defaults to false
+    pub fn setEager(&mut self, value: bool) {
+        self.lib_config.detector.eager = value;
     }
     /// Use a gain-normalization filter to dynamically change the input volume level.
     ///
@@ -300,25 +310,6 @@ impl RustpotterConfig {
     /// Defaults to 1
     pub fn setChannels(&mut self, value: u16) {
         self.lib_config.fmt.channels = value;
-    }
-    /// Configures the comparator the band size.
-    /// Doesn't apply to trained wakewords.
-    ///
-    /// Defaults to 5
-    pub fn setBandSize(&mut self, value: u16) {
-        self.lib_config.detector.band_size = value;
-    }
-    /// Value used to express the score as a percent in range 0 - 1.
-    ///
-    /// Defaults to 0.22
-    pub fn setScoreRef(&mut self, value: f32) {
-        self.lib_config.detector.score_ref = value;
-    }
-    /// Emit detection on min scores.
-    ///
-    /// Defaults to false
-    pub fn setEager(&mut self, value: bool) {
-        self.lib_config.detector.eager = value;
     }
 }
 #[wasm_bindgen]

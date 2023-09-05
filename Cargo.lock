@@ -617,9 +617,9 @@ dependencies = [
 
 [[package]]
 name = "rustpotter"
-version = "3.0.0-rc.1"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d6ffcfab9125056ab66e960347c468dee42eb464189ee0602a84eb3a2d6c96b"
+checksum = "4b362aaf5f873dae48230ae6e0ccf41f270d3728132cf154070a07143589cb33"
 dependencies = [
  "candle-core",
  "candle-nn",
@@ -632,7 +632,7 @@ dependencies = [
 
 [[package]]
 name = "rustpotter-wasm"
-version = "3.0.0-rc.1"
+version = "3.0.0"
 dependencies = [
  "console_error_panic_hook",
  "getrandom",
